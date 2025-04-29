@@ -90,20 +90,29 @@ export default function ClassSchedule({ classes = [] }: ClassScheduleProps) {
   };
   
   return (
-    <div className="container mx-auto py-6">
+    <div className="container mx-4">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {classes.map((classItem: ClassItem) => {
           const isReserved = reservedClasses.includes(classItem.Id) || classItem.Status === "Reserved";
           const isWaitlisted = waitlistedClasses.includes(classItem.Id);
           const startTime = formatTime(classItem.StartTime);
           const endTime = formatTime(classItem.EndTime);
-          
+          // Parse the time strings and compare with current time
+          const today = new Date();
+          const currentTime = today.getHours() * 60 + today.getMinutes();
+          const [hours, minutes] = classItem.StartTime.split(':').map(Number);
+          const classStartTime = hours * 60 + minutes;
+          const isPastClass = currentTime > classStartTime;
+                    
           return (
-            <Card key={classItem.Id} className={`overflow-hidden ${isReserved ? 'border-green-500 border-2' : ''}`}>
-              <div className="p-4 border-b">
+            <Card 
+              key={classItem.Id} 
+              className={`overflow-hidden ${isReserved ? 'border-green-500 border-2' : ''} ${isPastClass ? 'opacity-60' : ''}`}
+            >
+              <div className="px-4 pb-2 border-b">
                 <div className="flex items-center justify-between">
                   <h2 className="text-xl font-semibold">{classItem.Name}</h2>
-                  {classItem.ProgramId === "6760" && (
+                  {!isPastClass && classItem.ProgramId === "6760" && (
                     <Badge className="bg-purple-500">SurgeFit</Badge>
                   )}
                 </div>
@@ -123,78 +132,93 @@ export default function ClassSchedule({ classes = [] }: ClassScheduleProps) {
                     </span>
                   </div>
                   
-                  {!classItem.IsAvailable && (
+                  {!isPastClass && !classItem.IsAvailable && (
                     <Badge variant="destructive" className="ml-2">
                       Full
                     </Badge>
                   )}
                 </div>
                 
-                {classItem.IsWaitlisting && (
+                {!isPastClass && classItem.IsWaitlisting && (
                   <div className="flex items-center mt-2 text-sm text-amber-600">
                     <AlertCircle size={16} className="mr-1" />
                     <span>Waitlist: {classItem.WaitlistCount} people</span>
                   </div>
                 )}
                 
-                {isReserved && (
+                {!isPastClass && isReserved && (
                   <Badge className="mt-2 bg-green-500">Reserved</Badge>
                 )}
                 
-                {isWaitlisted && (
+                {!isPastClass && isWaitlisted && (
                   <Badge variant="outline" className="mt-2 border-amber-500 text-amber-500">
                     On Waitlist
                   </Badge>
                 )}
+  
+                {isPastClass && (
+                  <div className="mt-2 text-sm text-gray-500">
+                    <p>This class has already started</p>
+                  </div>
+                )}
               </CardContent>
               
               <CardFooter>
-  {isReserved ? (
-    <Button
-      variant="destructive" 
-      className="w-full"
-      disabled
-      onClick={() => handleCancelReservation(classItem.Id)}
-    >
-      Cancel Reservation
-    </Button>
-  ) : !isWaitlisted ? (
-    <>
-      {classItem.IsAvailable ? (
-        <Button 
-          disabled={isLoading}
-          className="w-full" 
-          onClick={() => handleReserve(classItem.Id)}
-        >
-          Reserve Spot
-          {isLoading && (<Loader2 className="animate-spin" />)}
-        </Button>
-      ) : classItem.IsWaitlisting ? (
-        <Button
-         disabled
-          variant="outline" 
-          className="w-full border-amber-500 text-amber-500 hover:bg-amber-50"
-          onClick={() => handleJoinWaitlist(classItem.Id)}
-        >
-          Join Waitlist
-        </Button>
-      ) : (
-        <Button disabled className="w-full">
-          Class Full
-        </Button>
-      )}
-    </>
-  ) : (
-    <Button 
-      variant="outline" 
-      className="w-full"
-      disabled
-      onClick={() => handleCancelWaitlist(classItem.Id)}
-    >
-      Leave Waitlist
-    </Button>
-  )}
-</CardFooter>
+                {isPastClass ? (
+                  <Button
+                    variant="secondary"
+                    className="w-full"
+                    disabled
+                  >
+                    Class Started
+                  </Button>
+                ) : isReserved ? (
+                  <Button
+                    variant="destructive" 
+                    className="w-full"
+                    disabled={isLoading}
+                    onClick={() => handleCancelReservation(classItem.Id)}
+                  >
+                    Cancel Reservation
+                    {isLoading && (<Loader2 className="ml-2 animate-spin" />)}
+                  </Button>
+                ) : !isWaitlisted ? (
+                  <>
+                    {classItem.IsAvailable ? (
+                      <Button
+                        disabled={isLoading}
+                        className="w-full"
+                        onClick={() => handleReserve(classItem.Id)}
+                      >
+                        Reserve Spot
+                        {isLoading && (<Loader2 className="ml-2 animate-spin" />)}
+                      </Button>
+                    ) : classItem.IsWaitlisting ? (
+                      <Button
+                        variant="outline"
+                        className="w-full border-amber-500 text-amber-500 hover:bg-amber-50"
+                        onClick={() => handleJoinWaitlist(classItem.Id)}
+                      >
+                        Join Waitlist
+                      </Button>
+                    ) : (
+                      <Button disabled className="w-full">
+                        Class Full
+                      </Button>
+                    )}
+                  </>
+                ) : (
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    disabled={isLoading}
+                    onClick={() => handleCancelWaitlist(classItem.Id)}
+                  >
+                    Leave Waitlist
+                    {isLoading && (<Loader2 className="ml-2 animate-spin" />)}
+                  </Button>
+                )}
+              </CardFooter>
             </Card>
           );
         })}

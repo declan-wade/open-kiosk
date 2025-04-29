@@ -38,7 +38,7 @@ export default function Home() {
 
   return (
     <div className="items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family:var(--font-geist-sans)]">
-      <div className="mb-4 justify-self-start">
+      <div className="mb-6">
       <div>
         <h1 className="text-3xl font-bold mb-6">Class Schedule</h1>
       </div>

@@ -85,7 +85,7 @@ const createMarkup = (html: string) => {
 
 export default function WorkoutComponents({ components = [] }: WorkoutComponentsProps) {
   return (
-    <div className="container mx-auto py-6">
+    <div className="container mx-4 py-6">
       <h1 className="text-3xl font-bold mb-6">Today's Workout</h1>
       
       <Show>
@@ -118,7 +118,7 @@ export default function WorkoutComponents({ components = [] }: WorkoutComponents
                 {component.MeasureRepScheme && (
                   <div className="flex items-center text-sm text-gray-500 mt-1">
                     <Timer size={16} className="mr-1" />
-                    <span>{component.MeasureRepScheme}</span>
+                    <span className='text-gray-300'>{component.MeasureRepScheme}</span>
                   </div>
                 )}
               </CardHeader>
@@ -132,7 +132,7 @@ export default function WorkoutComponents({ components = [] }: WorkoutComponents
                       </AccordionTrigger>
                       <AccordionContent>
                         <div 
-                          className="prose prose-sm max-w-none text-gray-700"
+                          className="prose prose-sm max-w-none text-gray-300"
                           dangerouslySetInnerHTML={createMarkup(component.Comment)} 
                         />
                       </AccordionContent>
@@ -146,7 +146,7 @@ export default function WorkoutComponents({ components = [] }: WorkoutComponents
                       </AccordionTrigger>
                       <AccordionContent>
                         <div 
-                          className="prose prose-sm max-w-none text-gray-700"
+                          className="prose prose-sm max-w-none text-gray-300"
                           dangerouslySetInnerHTML={createMarkup(component.Description)} 
                         />
                       </AccordionContent>
