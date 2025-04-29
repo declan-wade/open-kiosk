@@ -3,9 +3,8 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "build": "tsc",
-    "start": "nodemon --watch 'src/**/*.ts' --exec 'ts-node' src/server.ts",
-    "dev": "nodemon --watch 'src/**/*.ts' --exec 'ts-node' src/server.ts"
+    "dev": "bun run --watch src/server.ts",
+    "start": "bun run src/server.ts"
   },
   "keywords": [],
   "author": "",

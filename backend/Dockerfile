@@ -1,42 +1,21 @@
-# Define the base image first
-FROM oven/bun:latest AS base
+# Use Bun base image
+FROM oven/bun:latest
 WORKDIR /usr/src/app
 
-# install dependencies into temp directory
-# this will cache them and speed up future builds
-FROM base AS install
-RUN mkdir -p /temp/dev
-COPY package.json bun.lock /temp/dev/
-RUN cd /temp/dev && bun install --frozen-lockfile
+# Copy package files
+COPY package.json bun.lock* ./
 
-# install with --production (exclude devDependencies)
-RUN mkdir -p /temp/prod
-COPY package.json bun.lock /temp/prod/
-RUN cd /temp/prod && bun install --frozen-lockfile --production
+# Install dependencies
+RUN bun install --frozen-lockfile
 
-# copy node_modules from temp directory
-# then copy all (non-ignored) project files into the image
-FROM base AS prerelease
-COPY --from=install /temp/dev/node_modules node_modules
+# Copy source files
 COPY . .
 
-FROM base AS build
-ENV NODE_ENV=production
-COPY --from=prerelease /usr/src/app .
-RUN bun run build
-
-# Copy built files
-FROM base AS release
-COPY --from=install /temp/prod/node_modules node_modules
-#COPY --from=build /usr/src/app/.next/standalone .
-#COPY --from=build /usr/src/app/.next/static ./.next/static
-COPY --from=build /usr/src/app/package.json .
-
-# Set runtime environment variables
-# ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
-# ENV NEXT_PUBLIC_SITE_URL=${NEXT_PUBLIC_SITE_URL}
-
-# run the app
+# Set user for security
 USER bun
+
+# Expose the port your Express server runs on
 EXPOSE 4000/tcp
-ENTRYPOINT [ "bun", "run", "start" ]
+
+# Run the server directly using TypeScript
+ENTRYPOINT [ "bun", "run", "src/server.ts" ]
